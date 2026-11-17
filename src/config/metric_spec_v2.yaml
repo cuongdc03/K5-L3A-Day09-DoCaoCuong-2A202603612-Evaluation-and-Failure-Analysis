@@ -16,10 +16,15 @@ metrics:
      threshold: {min: 0.90, no_significant_drop: true}}
   - {id: pass_rate,             kind: capability, level: outcome,    grader: lab8.metrics.trial_pass, blocking: true,
      threshold: {min: 0.85, no_significant_drop: true}}
-  # TODO M6: add a blocking pass_hat_5 metric. Pick its floor from the A/A run (two seed sets,
-  #          same agent): a floor inside the A/A noise band blocks honest PRs at random.
+  # M6: A/A on MockLLM (--aa 66,77,88,99,110) gives delta 0.0000 on every metric, so the MockLLM
+  # noise band is 0. With a real LLM it is > 0 and this floor must sit outside it. The baseline's own
+  # pass_hat_5 is 0.893 (swarm's seed%5==0 weakness); 0.85 leaves it ~0.04 headroom, and a 1-in-5
+  # seed bug costs more than that.
+  - {id: pass_hat_5,            kind: capability, level: outcome,    grader: lab9.stats.pass_hat_k, threshold: {min: 0.85}, blocking: true}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
-  # TODO M3 carry-over: your FM-08 metric from v1 goes here too.
+  - {id: reply_matches_ledger,  kind: capability, level: step,       grader: code, threshold: {min: 0.95}, blocking: true}   # FM-08 (carried over from v1)
+  - {id: proposal_correct,      kind: capability, level: outcome,    grader: code, threshold: {min: 0.95}, blocking: true}   # FM-05 pre-deduction hidden behind a denial
 slices:
-  # TODO M5: add at least money_movement and adversarial. Example of the shape:
+  - {name: money_movement, metric: pass_rate, min: 0.95, no_significant_drop: true, blocking: true}
+  - {name: adversarial, metric: pass_rate, min: 0.85, no_significant_drop: true, blocking: true}
   - {name: denial, metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}

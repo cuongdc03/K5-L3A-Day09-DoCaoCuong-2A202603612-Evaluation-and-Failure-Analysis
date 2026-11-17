@@ -73,6 +73,17 @@ class DbFactKept(Evaluator[Any, Trial]):
 
 
 @dataclass
+class ProposalCorrect(Evaluator[Any, Trial]):
+    """Outcome level. The amount the agent PROPOSED to the host must equal the label's proposal_amount.
+    Catches FM-05 pre-deduction when the host denies and the ledger stays 0 (refund_amount_correct blind)."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        label: Label = ctx.expected_output or {}
+        got, want = int(ctx.output["result"].get("proposal_amount") or 0), int(label.get("proposal_amount") or 0)
+        return EvaluationReason(value=got == want, reason=None if got == want else f"proposal={got} expected={want}")
+
+
+@dataclass
 class ReplyMatchesLedger(Evaluator[Any, Trial]):
     """Step level, FM-08. Every VND amount the reply states must equal what the LEDGER holds.
     No reply event / no amount in the reply (denied, needs_info...) is not a mismatch,
@@ -95,4 +106,5 @@ GRADERS: dict[str, type[Evaluator]] = {
     "refund_amount_correct": RefundAmountCorrect,
     "db_fact_kept": DbFactKept,
     "reply_matches_ledger": ReplyMatchesLedger,
+    "proposal_correct": ProposalCorrect,
 }
