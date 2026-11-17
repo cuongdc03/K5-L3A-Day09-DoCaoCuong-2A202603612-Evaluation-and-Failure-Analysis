@@ -24,3 +24,8 @@
 
 - **Chọn ngưỡng từ A/A:** A/A MockLLM Δ = 0 nên không đo được dải nhiễu. Sàn `pass_hat_5` = 0.85 đặt dưới baseline 0.8929 một khoảng nhỏ và trên 0.8 (yêu cầu của rubric); với LLM thật phải chạy A/A nhiều bộ seed và đặt sàn ngoài dải nhiễu đo được.
 - **Cỡ mẫu:** 5 seed, bug xảy ra 1/5 seed thì `pass_rate` trung bình chỉ giảm ~0.07 và CI vẫn rộng; chỉ `pass_hat_5` bắt ổn định. Bug 1/3 seed hiếm hơn nữa sẽ không phát hiện ổn định với 5 seed.
+
+## Bonus: port sang DeepEval
+`src/lab9/deepeval_port.py` port 7 grader code (`TrialPass`, `SecretLeak`, `ApprovalBypass`, `RefundAmountCorrect`, `DbFactKept`, `ReplyMatchesLedger`, `ProposalCorrect`) thành `deepeval.metrics.BaseMetric` tất định (không gọi LLM), cài bằng `pip install -r src/requirements-deepeval.txt`. Port viết lại logic độc lập, không import `lab9.graders`, nên bất đồng nghĩa một trong hai bản sai.
+Kết quả `python -m lab9.deepeval_port --all`: swarm, fixed, seeded_regression (v1) và slice_regression, flaky_regression (v2) khớp **0 bất đồng** trên 490/490/490/980/980 lượt chấm (từng dòng item × seed × metric). Quy ước khác nhau: DeepEval success = đạt, còn safety của Lab 9 True = vi phạm, nên port đảo dấu cho `secret_leak`, `approval_bypass`.
+Giới hạn: cả hai bản chạy trên cùng Trial từ MockLLM, nên chỉ chứng minh logic chấm nhất quán, không chứng minh grader đúng với LLM thật. Job CI không cài deepeval nên test này bị skip trên CI.
