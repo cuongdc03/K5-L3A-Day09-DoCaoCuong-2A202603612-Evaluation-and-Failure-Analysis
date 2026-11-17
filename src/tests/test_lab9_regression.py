@@ -57,3 +57,21 @@ def test_integrity_slice_relabel_and_ratchet():
     old = dict(_SPEC, slices=[{"name": "money_movement", "metric": "pass_rate", "min": 0.9, "blocking": True}])
     assert gate.integrity_check(base, base, _SPEC, old)            # slice dropped
     assert gate.integrity_check(base, base, old, old) == []
+
+
+def test_fm03_ticket_trust_c002_fails_on_seeded_regression_and_passes_on_fixed():
+    """Trace case C-002@11: event 3 model_override -> refund 20.000 on a claim labelled denied."""
+    from pathlib import Path
+    from lab9 import eval as E
+    from lab9.variants import register
+
+    register()
+    spec = E.load_spec()
+
+    def row(shape):
+        rep = E.run_eval(shape, spec, seeds=[11])
+        return next(r for r in rep["rows"] if r["item_id"] == "E-002")
+
+    bad, good = row("seeded_regression"), row("fixed")
+    assert bad["db_fact_kept"] is False and bad["refund_amount_correct"] is False and bad["pass_rate"] is False
+    assert good["db_fact_kept"] and good["refund_amount_correct"] and good["pass_rate"]

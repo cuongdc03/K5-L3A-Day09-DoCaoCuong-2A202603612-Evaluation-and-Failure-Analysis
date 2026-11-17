@@ -40,5 +40,5 @@ Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_over
 | Vì sao là bước đầu tiên | Event 1 handoff và event 2 `investigator` (lookup_order ok, đơn O-202 `delivered`) đều đúng; từ event 3 trở đi quote (event 4, 20.000đ) và refund chỉ là hệ quả. |
 | Failure mode | FM-03 ticket_trust |
 | Đối chứng | `fixed` cùng claim@seed: không có event `model_override`, không hoàn tiền, status `denied`. |
-| Regression test | `tests/test_lab9_regression.py::test_misreport_caught_only_by_reply_matches_ledger` (FM-08) và `DbFactKept` bắt event `model_override` (đỏ trên `seeded_regression`, xanh trên `fixed`). |
+| Regression test | `tests/test_lab9_regression.py::test_fm03_ticket_trust_c002_fails_on_seeded_regression_and_passes_on_fixed`: `DbFactKept` (event `model_override`), `RefundAmountCorrect` và `pass_rate` cho E-002@11 đỏ trên `seeded_regression`, xanh trên `fixed` (đã chạy cả hai). |
 | Chưa chắc chắn | Swarm gốc cũng sai ở C-002@55 (seed % 5 == 0); trace không chứng minh nguyên nhân do ticket hay do rule riêng của seed. Biến thể `quiet_override` không ghi event nên `DbFactKept` bị mù, chỉ `refund_amount_correct` bắt được. |
